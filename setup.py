@@ -6,7 +6,7 @@ with open("README.md", encoding="utf-8") as fh:
 
 setup(
     name="otel-observability",
-    version="0.1.2",
+    version="0.1.3",
     author="Mortada Touzi",
     author_email="mortada.touzi@gmail.com",
     description="A unified OpenTelemetry observability package for Python applications",

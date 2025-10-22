@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 
-from opentelemetry._logs import get_logger_provider, set_logger_provider
+from opentelemetry._logs import set_logger_provider
 from opentelemetry.exporter.otlp.proto.grpc._log_exporter import (
     OTLPLogExporter as GrpcOTLPLogExporter,
 )
@@ -26,18 +26,6 @@ class LoggingInitializer(ComponentInitializer):
 
     def _setup_provider(self) -> None:
         """Set up the logging provider and handlers."""
-        # Check if provider is already set - use a more robust check
-        current_provider = get_logger_provider()
-        # Check if it's a real LoggerProvider or a mock in tests
-        if current_provider is not None:
-            # If it's already a LoggerProvider instance, skip
-            if (hasattr(current_provider, "__class__") and
-                current_provider.__class__.__name__ == "LoggerProvider"):
-                return
-            # If it's a mock object (in tests), skip
-            if hasattr(current_provider, "_mock_name"):
-                return
-
         # Create and set logger provider
         logger_provider = LoggerProvider(
             resource=self.config.create_resource(),
@@ -86,7 +74,7 @@ class LoggingInitializer(ComponentInitializer):
     def _add_console_handler(self, logger: logging.Logger) -> None:
         """Add a console handler for debug output."""
         console_handler = logging.StreamHandler()
-        console_handler.setLevel(logging.DEBUG)
+        console_handler.setLevel(self.config.log_level)
         formatter = logging.Formatter(
             "%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S",
