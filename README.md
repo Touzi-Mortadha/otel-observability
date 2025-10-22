@@ -1,8 +1,7 @@
 # OTEL Observability Package
 
-![Build Status](https://github.com/Touzi-Mortadha/otel-observability/actions/workflows/publish.yml/badge.svg)
-![PyPI Version](https://img.shields.io/pypi/v/otel-observability)
-![Python Versions](https://img.shields.io/pypi/pyversions/otel-observability)
+[![Pylint](https://github.com/Touzi-Mortadha/otel-observability/actions/workflows/pylint.yml/badge.svg)](https://github.com/Touzi-Mortadha/otel-observability/actions/workflows/pylint.yml)
+[![Upload Python Package](https://github.com/Touzi-Mortadha/otel-observability/actions/workflows/python-publish.yml/badge.svg)](https://github.com/Touzi-Mortadha/otel-observability/actions/workflows/python-publish.yml)
 
 A unified OpenTelemetry observability package for Python applications that provides easy-to-use logging, metrics, and tracing with best practices.
 
