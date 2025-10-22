@@ -143,7 +143,7 @@ class TestObservabilityConfigFromEnv:
         os.environ.update({
             "OTEL_APP_NAME": "env-service",
             "OTEL_GRPC_URL": "grpc://otel:4317",
-            "http_endpoint": "http://otel:4318",
+            "HTTP_ENDPOINT": "http://otel:4318",
             "LOG_LEVEL": "DEBUG",
             "OTEL_INSECURE": "false",
             "OTEL_METRIC_EXPORT_INTERVAL_MS": "30000",
