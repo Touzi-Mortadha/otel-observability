@@ -1,3 +1,4 @@
+"""Setup configuration for the otel-observability package."""
 from setuptools import find_packages, setup
 
 with open("README.md", encoding="utf-8") as fh:
@@ -14,7 +15,7 @@ setup(
     description="A unified OpenTelemetry observability package for Python applications",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/otel-observability",
+    url="https://github.com/Touzi-Mortadha/otel-observability",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -43,7 +44,7 @@ setup(
     },
     keywords="opentelemetry, observability, logging, metrics, tracing, monitoring",
     project_urls={
-        "Bug Reports": "https://github.com/yourusername/otel-observability/issues",
-        "Source": "https://github.com/yourusername/otel-observability",
+        "Bug Reports": "https://github.com/Touzi-Mortadha/otel-observability/issues",
+        "Source": "https://github.com/Touzi-Mortadha/otel-observability",
     },
 )

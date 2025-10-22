@@ -200,15 +200,15 @@ class ObservabilityManager:
 
 
 # Convenience functions for easy access
-_manager: ObservabilityManager | None = None
+_manager_instance: ObservabilityManager | None = None
 
 
 def _get_manager() -> ObservabilityManager:
     """Get the singleton manager instance (lazy initialization)."""
-    global _manager
-    if _manager is None:
-        _manager = ObservabilityManager()
-    return _manager
+    global _manager_instance
+    if _manager_instance is None:
+        _manager_instance = ObservabilityManager()
+    return _manager_instance
 
 
 def get_logger(name: str) -> logging.Logger:
@@ -286,9 +286,9 @@ class ObservabilityDecorators:
                         )
                         span.record_exception(e)
                         raise
-                    else:
-                        span.set_status(trace.Status(trace.StatusCode.OK))
-                        return result
+
+                    span.set_status(trace.Status(trace.StatusCode.OK))
+                    return result
 
             return wrapper
 
@@ -308,9 +308,9 @@ class ObservabilityDecorators:
                 except Exception:
                     logger.exception("Error in %s", func.__name__)
                     raise
-                else:
-                    logger.debug("Successfully executed %s", func.__name__)
-                    return result
+
+                logger.debug("Successfully executed %s", func.__name__)
+                return result
 
             return wrapper
 
