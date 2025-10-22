@@ -1,5 +1,5 @@
 # OTEL Observability Package
-
+[![Pytest](https://github.com/Touzi-Mortadha/otel-observability/actions/workflows/pytest.yml/badge.svg)](https://github.com/Touzi-Mortadha/otel-observability/actions/workflows/pytest.yml)
 [![Pylint](https://github.com/Touzi-Mortadha/otel-observability/actions/workflows/pylint.yml/badge.svg)](https://github.com/Touzi-Mortadha/otel-observability/actions/workflows/pylint.yml)
 [![Upload Python Package](https://github.com/Touzi-Mortadha/otel-observability/actions/workflows/python-publish.yml/badge.svg)](https://github.com/Touzi-Mortadha/otel-observability/actions/workflows/python-publish.yml)
 
