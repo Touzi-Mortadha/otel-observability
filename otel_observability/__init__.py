@@ -23,7 +23,7 @@ from otel_observability.observability_manager import (
     initialize_observability,
 )
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __author__ = "Mortada Touzi"
 __email__ = "mortada.touzi@gmail.com"
 
