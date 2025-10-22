@@ -4,9 +4,6 @@ from setuptools import find_packages, setup
 with open("README.md", encoding="utf-8") as fh:
     long_description = fh.read()
 
-with open("requirements.txt", encoding="utf-8") as fh:
-    requirements = [line.strip() for line in fh if line.strip() and not line.startswith("#")]
-
 setup(
     name="otel-observability",
     version="0.1.0",
@@ -31,7 +28,11 @@ setup(
         "Topic :: System :: Monitoring",
     ],
     python_requires=">=3.8",
-    install_requires=requirements,
+    install_requires=[
+        "opentelemetry-api>=1.38.0",
+        "opentelemetry-sdk>=1.38.0",
+        "opentelemetry-exporter-otlp>=1.38.0",
+    ],
     extras_require={
         "dev": [
             "pytest>=7.0.0",
