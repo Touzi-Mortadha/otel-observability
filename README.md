@@ -1,5 +1,9 @@
 # OTEL Observability Package
 
+![Build Status](https://github.com/Touzi-Mortadha/otel-observability/actions/workflows/publish.yml/badge.svg)
+![PyPI Version](https://img.shields.io/pypi/v/otel-observability)
+![Python Versions](https://img.shields.io/pypi/pyversions/otel-observability)
+
 A unified OpenTelemetry observability package for Python applications that provides easy-to-use logging, metrics, and tracing with best practices.
 
 ## Features
@@ -21,7 +25,7 @@ pip install otel-observability
 ### From Source
 
 ```bash
-git clone https://github.com/yourusername/otel-observability.git
+git clone https://github.com/Touzi-Mortadha/otel-observability.git
 cd otel-observability
 pip install -e .
 ```
@@ -187,48 +191,3 @@ async def read_root():
     with tracer.start_as_current_span("read_root"):
         logger.info("Root endpoint called")
         return {"Hello": "World"}
-```
-
-## Development
-
-### Setting up Development Environment
-
-```bash
-git clone https://github.com/yourusername/otel-observability.git
-cd otel-observability
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -e ".[dev]"
-```
-
-### Running Tests
-
-```bash
-pytest
-```
-
-### Building for Distribution
-
-```bash
-python -m build
-```
-
-## Publishing to PyPI
-
-1. Update version in `pyproject.toml` and `setup.py`
-2. Build the package:
-   ```bash
-   python -m build
-   ```
-3. Upload to PyPI:
-   ```bash
-   twine upload dist/*
-   ```
-
-## License
-
-MIT License - see LICENSE file for details.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
