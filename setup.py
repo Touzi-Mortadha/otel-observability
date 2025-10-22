@@ -6,7 +6,7 @@ with open("README.md", encoding="utf-8") as fh:
 
 setup(
     name="otel-observability",
-    version="0.1.1",
+    version="0.1.2",
     author="Mortada Touzi",
     author_email="mortada.touzi@gmail.com",
     description="A unified OpenTelemetry observability package for Python applications",
@@ -28,9 +28,9 @@ setup(
     ],
     python_requires=">=3.8",
     install_requires=[
-        "opentelemetry-api>=1.38.0",
-        "opentelemetry-sdk>=1.38.0",
-        "opentelemetry-exporter-otlp>=1.38.0",
+        "opentelemetry-api>=1.37.0",
+        "opentelemetry-sdk>=1.37.0",
+        "opentelemetry-exporter-otlp>=1.37.0",
     ],
     extras_require={
         "dev": [
