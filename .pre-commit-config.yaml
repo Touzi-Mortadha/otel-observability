@@ -1,0 +1,27 @@
+default_language_version:
+  python: python3.13
+default_stages:
+  - pre-commit
+repos:
+  # basic hooks from pre-commit itself [python]
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      # - id: no-commit-to-branch # no commit on master or main
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: detect-private-key
+      - id: mixed-line-ending
+      - id: end-of-file-fixer
+      - id: requirements-txt-fixer
+
+  # ruff, the lightning fast static code/style checker/fixer [python]
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.13.0
+    hooks:
+      # Run the formatter.
+      - id: ruff-format
+      # Run the linter.
+      - id: ruff-check
+        args: [ --fix ]
+      - id: ruff

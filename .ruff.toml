@@ -1,0 +1,20 @@
+# ruff configuration
+line-length = 100
+
+# Exclude patterns
+exclude = [
+    ".git",
+    ".pytest_cache", 
+    ".ruff_cache",
+    "build",
+    "dist",
+    "*.egg-info",
+    "*.pyc",
+    "__pycache__",
+    "tests/**",  # Exclude tests directory
+]
+
+# Lint rules
+[lint]
+# Enable all rules
+select = ["ALL"]
