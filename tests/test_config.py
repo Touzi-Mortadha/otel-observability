@@ -17,7 +17,7 @@ class TestObservabilityConfig:
 
         assert config.app_name == "test-service"
         assert config.otlp_endpoint is None
-        assert config.http_endpoint is None
+        assert config.otel_http_url is None
         assert config.insecure is True
         assert config.log_level == logging.INFO
         assert config.metric_export_interval_ms == 60000
@@ -29,7 +29,7 @@ class TestObservabilityConfig:
             app_name="test-service",
             component="test-component",
             otlp_endpoint="localhost:4317",
-            http_endpoint="http://localhost:4318",
+            otel_http_url="http://localhost:4318",
             insecure=False,
             log_level=logging.DEBUG,
             metric_export_interval_ms=30000,
@@ -38,7 +38,7 @@ class TestObservabilityConfig:
 
         assert config.app_name == "test-service"
         assert config.otlp_endpoint == "localhost:4317"
-        assert config.http_endpoint == "http://localhost:4318"
+        assert config.otel_http_url == "http://localhost:4318"
         assert config.insecure is False
         assert config.log_level == logging.DEBUG
         assert config.metric_export_interval_ms == 30000
@@ -49,7 +49,7 @@ class TestObservabilityConfig:
         config = ObservabilityConfig(
             app_name="test-service",
             component="test-component",
-            http_endpoint="http://otel-collector:4318",
+            otel_http_url="http://otel-collector:4318",
         )
 
         assert config.http_logs_url == "http://otel-collector:4318/v1/logs"
@@ -61,7 +61,7 @@ class TestObservabilityConfig:
         config = ObservabilityConfig(
             app_name="test-service",
             component="test-component",
-            http_endpoint="http://otel-collector:4318",
+            otel_http_url="http://otel-collector:4318",
             http_logs_url="http://custom:4318/v1/logs",
         )
 
@@ -111,7 +111,7 @@ class TestObservabilityConfigFromEnv:
     def setup_method(self):
         """Clear environment variables before each test."""
         env_vars_to_clear = [
-            "OTEL_APP_NAME", "OTEL_GRPC_URL", "HTTP_ENDPOINT",
+            "OTEL_APP_NAME", "OTEL_GRPC_URL", "OTEL_HTTP_URL",
             "OTEL_HTTP_LOGS_URL", "OTEL_HTTP_TRACES_URL", "OTEL_HTTP_METRICS_URL",
             "LOG_LEVEL", "OTEL_INSECURE", "OTEL_METRIC_EXPORT_INTERVAL_MS",
             "ENABLE_CONSOLE_DEBUG",
@@ -126,7 +126,7 @@ class TestObservabilityConfigFromEnv:
 
         assert config.app_name == "unknown-service"
         assert config.otlp_endpoint is None
-        assert config.http_endpoint is None
+        assert config.otel_http_url is None
         assert config.insecure is True
         assert config.log_level == logging.INFO
         assert config.metric_export_interval_ms == 60000
@@ -143,7 +143,7 @@ class TestObservabilityConfigFromEnv:
         os.environ.update({
             "OTEL_APP_NAME": "env-service",
             "OTEL_GRPC_URL": "grpc://otel:4317",
-            "HTTP_ENDPOINT": "http://otel:4318",
+            "OTEL_HTTP_URL": "http://otel:4318",
             "LOG_LEVEL": "DEBUG",
             "OTEL_INSECURE": "false",
             "OTEL_METRIC_EXPORT_INTERVAL_MS": "30000",
@@ -154,7 +154,7 @@ class TestObservabilityConfigFromEnv:
 
         assert config.app_name == "env-service"
         assert config.otlp_endpoint == "grpc://otel:4317"
-        assert config.http_endpoint == "http://otel:4318"
+        assert config.otel_http_url == "http://otel:4318"
         assert config.http_logs_url == "http://otel:4318/v1/logs"
         assert config.http_traces_url == "http://otel:4318/v1/traces"
         assert config.http_metrics_url == "http://otel:4318/v1/metrics"

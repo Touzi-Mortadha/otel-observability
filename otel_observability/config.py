@@ -30,7 +30,7 @@ class ObservabilityConfig:
     app_name: str
     component: str
     otlp_endpoint: str | None = None
-    http_endpoint: str | None = None
+    otel_http_url: str | None = None
     http_logs_url: str | None = None
     http_traces_url: str | None = None
     http_metrics_url: str | None = None
@@ -41,13 +41,13 @@ class ObservabilityConfig:
 
     def __post_init__(self) -> None:
         """Build HTTP URLs from base URL if not explicitly provided."""
-        if self.http_endpoint:
+        if self.otel_http_url:
             if not self.http_logs_url:
-                self.http_logs_url = f"{self.http_endpoint}/v1/logs"
+                self.http_logs_url = f"{self.otel_http_url}/v1/logs"
             if not self.http_traces_url:
-                self.http_traces_url = f"{self.http_endpoint}/v1/traces"
+                self.http_traces_url = f"{self.otel_http_url}/v1/traces"
             if not self.http_metrics_url:
-                self.http_metrics_url = f"{self.http_endpoint}/v1/metrics"
+                self.http_metrics_url = f"{self.otel_http_url}/v1/metrics"
 
     @classmethod
     def from_env(cls, **kwargs) -> ObservabilityConfig:  # noqa: ANN003
@@ -59,16 +59,16 @@ class ObservabilityConfig:
             "OTEL_COMPONENT_NAME", "unknown-component",
         )
         otlp_endpoint = kwargs.get("otlp_endpoint") or os.getenv("OTEL_GRPC_URL")
-        http_endpoint = kwargs.get("http_endpoint") or os.getenv("HTTP_ENDPOINT")
+        otel_http_url = kwargs.get("otel_http_url") or os.getenv("OTEL_HTTP_URL")
 
         # Build URLs from base HTTP URL if provided
         http_logs_url = None
         http_traces_url = None
         http_metrics_url = None
-        if http_endpoint:
-            http_logs_url = f"{http_endpoint}/v1/logs"
-            http_traces_url = f"{http_endpoint}/v1/traces"
-            http_metrics_url = f"{http_endpoint}/v1/metrics"
+        if otel_http_url:
+            http_logs_url = f"{otel_http_url}/v1/logs"
+            http_traces_url = f"{otel_http_url}/v1/traces"
+            http_metrics_url = f"{otel_http_url}/v1/metrics"
 
         # Override with specific URLs if provided
         http_logs_url = os.getenv("OTEL_HTTP_LOGS_URL", http_logs_url)
@@ -94,7 +94,7 @@ class ObservabilityConfig:
             app_name=app_name,
             component=component,
             otlp_endpoint=otlp_endpoint,
-            http_endpoint=http_endpoint,
+            otel_http_url=otel_http_url,
             http_logs_url=http_logs_url,
             http_traces_url=http_traces_url,
             http_metrics_url=http_metrics_url,

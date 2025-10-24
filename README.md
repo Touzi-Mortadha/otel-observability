@@ -103,10 +103,10 @@ result = process_data({"input": "test"})
 | `OTEL_APP_NAME` | App name for resource attributes | `unknown-service` |
 | `OTEL_COMPONENT_NAME` | service name for resource attributes | `unknown-component` |
 | `OTEL_GRPC_URL` | OTLP gRPC endpoint URL | None |
-| `HTTP_ENDPOINT` | Base HTTP URL for OTLP HTTP exporters | None |
-| `OTEL_HTTP_LOGS_URL` | Specific HTTP URL for logs | `{HTTP_ENDPOINT}/v1/logs` |
-| `OTEL_HTTP_TRACES_URL` | Specific HTTP URL for traces | `{HTTP_ENDPOINT}/v1/traces` |
-| `OTEL_HTTP_METRICS_URL` | Specific HTTP URL for metrics | `{HTTP_ENDPOINT}/v1/metrics` |
+| `OTEL_HTTP_URL` | Base HTTP URL for OTLP HTTP exporters | None |
+| `OTEL_HTTP_LOGS_URL` | Specific HTTP URL for logs | `{OTEL_HTTP_URL}/v1/logs` |
+| `OTEL_HTTP_TRACES_URL` | Specific HTTP URL for traces | `{OTEL_HTTP_URL}/v1/traces` |
+| `OTEL_HTTP_METRICS_URL` | Specific HTTP URL for metrics | `{OTEL_HTTP_URL}/v1/metrics` |
 | `OTEL_INSECURE` | Use insecure connection for gRPC | `true` |
 | `LOG_LEVEL` | Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL) | `INFO` |
 | `OTEL_METRIC_EXPORT_INTERVAL_MS` | Metrics export interval in milliseconds | `60000` |
