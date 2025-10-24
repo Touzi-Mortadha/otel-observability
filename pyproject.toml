@@ -8,7 +8,7 @@ version = "0.1.4"
 description = "A unified OpenTelemetry observability package for Python applications"
 readme = "README.md"
 requires-python = ">=3.9"
-license = {text = "MIT"}
+license = {text = "AGPL-3.0"}
 authors = [
     {name = "Mortada Touzi", email = "mortada.touzi@gmail.com"}
 ]
@@ -16,7 +16,7 @@ keywords = ["opentelemetry", "observability", "logging", "metrics", "tracing", "
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: GNU Affero General Public License v3",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
