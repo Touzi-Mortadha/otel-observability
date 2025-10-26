@@ -266,3 +266,182 @@ class TestObservabilityDecorators:
             return "test_result"
 
         assert callable(test_function)
+
+    def test_trace_propagator_decorator(self):
+        """Test trace_propagator decorator basic functionality."""
+        from unittest.mock import Mock, patch
+
+        @ObservabilityDecorators.trace_propagator()
+        def test_function(*args, **kwargs):
+            return "test_result"
+
+        # The decorator should wrap the function and preserve metadata
+        assert callable(test_function)
+        # functools.wraps preserves the original function name
+        assert test_function.__name__ == "test_function"
+
+    def test_trace_propagator_with_trace_context(self):
+        """Test trace_propagator with trace context in arguments."""
+        from unittest.mock import Mock, patch
+        from opentelemetry.trace import SpanContext, SpanKind, TraceFlags
+        from opentelemetry.trace import NonRecordingSpan
+        import opentelemetry.context as context
+
+        # Create a mock trace context
+        trace_id = 0x6e0c63257de34c926f9efcd03927272e
+        span_id = 0x34ebf0c2f0f4732a
+        trace_flags = TraceFlags(0x01)
+
+        # Mock the traceparent header format
+        traceparent = f"00-{trace_id:032x}-{span_id:016x}-{trace_flags:02x}"
+
+        with patch('otel_observability.observability_manager.get_traces') as mock_get_traces:
+            mock_tracer = Mock()
+            mock_span = Mock()
+            mock_tracer.start_as_current_span.return_value.__enter__ = Mock(return_value=mock_span)
+            mock_tracer.start_as_current_span.return_value.__exit__ = Mock(return_value=None)
+            mock_get_traces.return_value = mock_tracer
+
+            @ObservabilityDecorators.trace_propagator()
+            def test_function(carrier, other_arg):
+                return f"result: {other_arg}"
+
+            # Test with trace context in arguments
+            result = test_function({"traceparent": traceparent}, "test_value")
+
+            # Verify the function was called and returned correct result
+            assert result == "result: test_value"
+            
+            # Verify tracer was obtained
+            mock_get_traces.assert_called_once()
+            
+            # Verify span was created
+            mock_tracer.start_as_current_span.assert_called_once_with("test_function")
+
+    def test_trace_propagator_without_trace_context(self):
+        """Test trace_propagator when no trace context is provided."""
+        from unittest.mock import Mock, patch
+
+        with patch('otel_observability.observability_manager.get_traces') as mock_get_traces:
+            mock_tracer = Mock()
+            mock_span = Mock()
+            mock_tracer.start_as_current_span.return_value.__enter__ = Mock(return_value=mock_span)
+            mock_tracer.start_as_current_span.return_value.__exit__ = Mock(return_value=None)
+            mock_get_traces.return_value = mock_tracer
+
+            @ObservabilityDecorators.trace_propagator()
+            def test_function(arg1, arg2):
+                return arg1 + arg2
+
+            # Test without trace context
+            result = test_function(1, 2)
+
+            # Verify the function was called and returned correct result
+            assert result == 3
+            
+            # Verify tracer was obtained
+            mock_get_traces.assert_called_once()
+            
+            # Verify span was created (even without trace context)
+            mock_tracer.start_as_current_span.assert_called_once_with("test_function")
+
+    def test_trace_propagator_with_exception(self):
+        """Test trace_propagator when the decorated function raises an exception."""
+        from unittest.mock import Mock, patch
+
+        with patch('otel_observability.observability_manager.get_traces') as mock_get_traces:
+            mock_tracer = Mock()
+            mock_span = Mock()
+            mock_tracer.start_as_current_span.return_value.__enter__ = Mock(return_value=mock_span)
+            mock_tracer.start_as_current_span.return_value.__exit__ = Mock(return_value=None)
+            mock_get_traces.return_value = mock_tracer
+
+            @ObservabilityDecorators.trace_propagator()
+            def test_function():
+                raise ValueError("Test error")
+
+            # Test that exception is propagated
+            try:
+                test_function()
+                assert False, "Expected exception was not raised"
+            except ValueError as e:
+                assert str(e) == "Test error"
+
+            # Verify span was still created despite the exception
+            mock_tracer.start_as_current_span.assert_called_once_with("test_function")
+
+    def test_trace_propagator_carrier_extraction(self):
+        """Test that trace_propagator correctly extracts carrier from different argument positions."""
+        from unittest.mock import Mock, patch
+
+        traceparent = "00-6e0c63257de34c926f9efcd03927272e-34ebf0c2f0f4732a-01"
+
+        with patch('otel_observability.observability_manager.get_traces') as mock_get_traces:
+            mock_tracer = Mock()
+            mock_span = Mock()
+            mock_tracer.start_as_current_span.return_value.__enter__ = Mock(return_value=mock_span)
+            mock_tracer.start_as_current_span.return_value.__exit__ = Mock(return_value=None)
+            mock_get_traces.return_value = mock_tracer
+
+            @ObservabilityDecorators.trace_propagator()
+            def test_function(arg1, arg2, arg3):
+                # Filter out carrier dictionaries from the output
+                args_list = []
+                for arg in [arg1, arg2, arg3]:
+                    if isinstance(arg, dict) and "traceparent" in arg:
+                        args_list.append("carrier")
+                    else:
+                        args_list.append(str(arg))
+                return "-".join(args_list)
+
+            # Test with carrier as first argument
+            result1 = test_function({"traceparent": traceparent}, "b", "c")
+            assert result1 == "carrier-b-c"
+
+            # Test with carrier as second argument
+            result2 = test_function("a", {"traceparent": traceparent}, "c")
+            assert result2 == "a-carrier-c"
+
+            # Test with carrier as third argument
+            result3 = test_function("a", "b", {"traceparent": traceparent})
+            assert result3 == "a-b-carrier"
+
+            # Verify span was created for each call
+            assert mock_tracer.start_as_current_span.call_count == 3
+
+    def test_trace_propagator_preserves_function_metadata(self):
+        """Test that trace_propagator preserves function metadata using functools.wraps."""
+
+        def original_function(x, y=10):
+            """This is a test function."""
+            return x + y
+
+        decorated_function = ObservabilityDecorators.trace_propagator()(original_function)
+
+        # Verify metadata is preserved - functools.wraps preserves the original function name
+        assert decorated_function.__name__ == "original_function"
+        assert decorated_function.__doc__ == "This is a test function."
+
+    def test_trace_propagator_with_kwargs(self):
+        """Test trace_propagator with keyword arguments."""
+        from unittest.mock import Mock, patch
+
+        traceparent = "00-6e0c63257de34c926f9efcd03927272e-34ebf0c2f0f4732a-01"
+
+        with patch('otel_observability.observability_manager.get_traces') as mock_get_traces:
+            mock_tracer = Mock()
+            mock_span = Mock()
+            mock_tracer.start_as_current_span.return_value.__enter__ = Mock(return_value=mock_span)
+            mock_tracer.start_as_current_span.return_value.__exit__ = Mock(return_value=None)
+            mock_get_traces.return_value = mock_tracer
+
+            @ObservabilityDecorators.trace_propagator()
+            def test_function(a, b, carrier=None):
+                return a + b
+
+            # Test with carrier in kwargs
+            result = test_function(1, 2, carrier={"traceparent": traceparent})
+            assert result == 3
+
+            # Verify span was created
+            mock_tracer.start_as_current_span.assert_called_once_with("test_function")

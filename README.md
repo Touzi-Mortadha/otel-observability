@@ -11,7 +11,7 @@ A unified OpenTelemetry observability package for Python applications that provi
 - **Multiple Exporters**: Support for OTLP (gRPC), HTTP, and Console exporters
 - **Thread-Safe**: Singleton pattern ensures thread-safe initialization
 - **Easy Integration**: Simple API for logging, metrics, and tracing
-- **Decorators**: Built-in decorators for automatic tracing and logging
+- **Decorators**: Built-in decorators for automatic tracing, logging, and trace propagation
 
 ## Installation
 
@@ -94,6 +94,53 @@ def process_data(data):
 result = process_data({"input": "test"})
 ```
 
+### Trace Propagation
+
+The `@trace_propagator()` decorator is useful for propagating trace context from incoming requests (e.g., HTTP headers, message queues) and creating child spans:
+
+```python
+from otel_observability import ObservabilityDecorators
+from opentelemetry.propagate import inject
+
+@ObservabilityDecorators.trace_propagator()
+def handle_incoming_request(carrier, payload):
+    """
+    Handle incoming request with trace context propagation.
+    
+    Args:
+        carrier: Dictionary containing trace context (e.g., HTTP headers)
+        payload: The actual request payload
+    """
+    # This function will automatically:
+    # 1. Extract trace context from the carrier dictionary
+    # 2. Create a new span as part of the existing trace
+    # 3. Execute the function within the trace context
+    # 4. Clean up the context after execution
+    
+    logger.info(f"Processing payload: {payload}")
+    return {"status": "success", "data": payload}
+
+# Example usage with W3C trace context
+trace_carrier = {}
+inject(carrier=trace_carrier)
+
+payload = {"user_id": 123, "action": "login"}
+
+result = handle_incoming_request(trace_carrier, payload)
+```
+
+You can also use multiple decorators together:
+
+```python
+@ObservabilityDecorators.trace_propagator()
+@ObservabilityDecorators.log_execution(logger_name="api_handler")
+def api_endpoint_handler(headers, body):
+    """Handle API endpoint with trace propagation and logging."""
+    # The trace_propagator will extract context from headers
+    # The log_execution will log method entry and exit
+    return process_business_logic(body)
+```
+
 ## Configuration
 
 ### Environment Variables
@@ -151,6 +198,7 @@ The main manager class providing:
 
 - `@trace_method()`: Automatically trace method execution
 - `@log_execution()`: Automatically log method execution
+- `@trace_propagator()`: Propagate trace context from carrier and create spans
 
 ## Examples
 

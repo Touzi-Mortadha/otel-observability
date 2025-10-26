@@ -6,13 +6,16 @@ Implements logging, metrics, and tracing with best practices.
 from __future__ import annotations
 
 import logging
+from functools import wraps
 from threading import Lock
-from typing import TYPE_CHECKING, Self
+from typing import Any, TYPE_CHECKING, Self
 
 from opentelemetry import metrics, trace
 from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.sdk.trace import TracerProvider
-
+from opentelemetry.propagate import extract
+from opentelemetry.context import attach, detach
+from opentelemetry.propagators.textmap import Getter
 from otel_observability.config import ExporterType, ObservabilityConfig
 from otel_observability.logs.logging import LoggingInitializer
 from otel_observability.metrics.metrics import MetricsInitializer
@@ -21,6 +24,7 @@ from otel_observability.traces.traces import TracingInitializer
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+TRACEPARENT_KEY = "traceparent"
 
 class ObservabilityManager:
     """Singleton manager for all observability components.
@@ -264,6 +268,37 @@ def initialize_observability() -> ObservabilityManager:
     return manager
 
 
+class CarrierGetter(Getter):
+    """Helper class to extract context from OpenTelemetry carriers."""
+
+    def get(self, carrier: dict[str, Any], key: str) -> list[str]:
+        """
+        Get the value for a key from the carrier.
+
+        Args:
+            carrier: The carrier dictionary.
+            key: The key to retrieve.
+
+        Returns:
+            A list containing the string value if found, otherwise an empty list.
+        """
+        value = carrier.get(key)
+        if value is not None:
+            return [str(value)]
+        return []
+
+    def keys(self, carrier: dict[str, Any]) -> list[str]:
+        """
+        Get all keys from the carrier.
+
+        Args:
+            carrier: The carrier dictionary.
+
+        Returns:
+            A list of keys in the carrier.
+        """
+        return list(carrier.keys())
+
 # Example usage and utilities
 class ObservabilityDecorators:
     """Utility decorators for observability."""
@@ -311,6 +346,35 @@ class ObservabilityDecorators:
 
                 logger.debug("Successfully executed %s", func.__name__)
                 return result
+
+            return wrapper
+
+        return decorator
+    
+    @staticmethod
+    def trace_propagator() -> Callable:
+        """
+        Create a decorator to propagate OpenTelemetry trace context in another function.
+
+        Returns:
+            A decorator function for trace propagation.
+        """
+        def decorator(func: Callable) -> Callable:
+            @wraps(func)
+            def wrapper(*args: object, **kwargs: object) -> object:
+                # Proceed only if both trace_id and span_id are provided
+                tracer = get_traces(__name__)
+                carrier = {}
+                for arg in args:
+                    if isinstance(arg, dict) and TRACEPARENT_KEY in arg:
+                        carrier = arg
+                context = extract(getter=CarrierGetter(), carrier=carrier)
+                token = attach(context)
+                try:
+                    with tracer.start_as_current_span(func.__name__):
+                        return func(*args, **kwargs)
+                finally:
+                    detach(token)
 
             return wrapper
 
