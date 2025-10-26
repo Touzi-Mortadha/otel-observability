@@ -1,0 +1,52 @@
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+
+common:
+  replication_factor: 1
+  ring:
+    instance_addr: 127.0.0.1
+    kvstore:
+      store: inmemory
+
+ingester:
+  wal:
+    dir: "/loki/wal"
+  lifecycler:
+    address: 127.0.0.1
+    ring:
+      kvstore:
+        store: inmemory
+      replication_factor: 1
+  chunk_idle_period: 5m  # How long logs stay in memory before being flushed
+  chunk_retain_period: 30s  # How long logs stay in memory after being written to disk
+
+schema_config:
+  configs:
+    - from: 2023-01-01
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+storage_config:
+  tsdb_shipper:
+    active_index_directory: /loki/index  # Directory for storing index files
+    cache_location: /loki/cache         # Directory for caching
+  filesystem:
+    directory: /loki/chunks  # Directory for storing log chunks
+
+compactor:
+  working_directory: /loki/compactor  # Specify a valid directory for the compactor
+
+limits_config:
+  allow_structured_metadata: true
+  reject_old_samples: true
+  reject_old_samples_max_age: 720h  # Reject logs older than 30 days
+
+table_manager:
+  retention_deletes_enabled: true
+  retention_period: 720h  # Retain logs for 30 days and delete older logs

@@ -1,0 +1,41 @@
+# config file version
+apiVersion: 1
+
+deleteDatasources:
+  - name: Prometheus
+    orgId: 1
+
+prune: true
+
+datasources:
+  - name: Jaeger
+    type: jaeger
+    access: proxy
+    url: http://jaeger:16686
+    isDefault: false
+    editable: true
+
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    orgId: 1
+    url: http://prometheus:9090
+    basicAuth: false
+    isDefault: false
+    editable: true
+  - name: loki
+    type: loki
+    uid: my-loki
+    access: server
+    orgId: 1
+    url: http://loki:3100
+    basicAuth: false
+    isDefault: false
+    version: 1
+    editable: true
+    jsonData:
+      derivedFields:
+        - datasourceUid: Jaeger
+          name: TraceID
+          matcherRegex: '"traceid":\s*"([^"]+)"'
+          url: '$${__value.raw}'

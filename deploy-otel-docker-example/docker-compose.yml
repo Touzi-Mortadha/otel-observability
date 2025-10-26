@@ -1,0 +1,115 @@
+services:
+  otel-nginx:
+    container_name: nginx
+    build:
+      context: .
+      dockerfile: ./config/nginx/Dockerfile
+    environment:
+      - DEBUG=1
+      - SSL_CERTIFICATE=
+      - SSL_CERTIFICATE_KEY=
+    ports:
+      - 8080:80
+    depends_on:
+      - otel-grafana
+    networks:
+      - n_observability
+    restart: unless-stopped
+
+  otel-grafana:
+    image: grafana/grafana:11.5
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+    volumes:
+      - ./config/observability/grafana/grafana.ini:/etc/grafana/grafana.ini:ro
+      - ./config/observability/grafana/provisioning/datasources/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+      - v_grafana:/var/lib/grafana
+    depends_on:
+      - otel-jaeger
+      - otel-prometheus
+      - otel-loki
+      - otel-cadvisor
+    networks:
+      - n_observability
+    restart: always
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.132.0
+    container_name: otel_collector
+    command: ["--config=/etc/otel/otel-collector-config.yaml"]
+    volumes:
+      - ./config/observability/otel-collector-config.yaml:/etc/otel/otel-collector-config.yaml:ro
+    ports:
+    #   - "1888:1888"   # pprof extension
+    #   - "8888:8888"   # Prometheus metrics exposed by the collector
+    #   - "8889:8889"   # Prometheus exporter metrics
+    #   - "13133:13133" # health_check extension
+      - "4317:4317"   # OTLP gRPC receiver
+    #   - "55679:55679" # zpages extension
+      - "4318:4318"   # OTLP HTTP endpoint
+    #   - "55681:55681" # (Optional) OTLP HTTP endpoint
+    depends_on:
+      - otel-jaeger
+      - otel-prometheus
+      - otel-loki
+    networks:
+      - n_observability
+    restart: always
+  
+  otel-prometheus:
+    container_name: prometheus
+    image: prom/prometheus:v3.5.0
+    networks:
+      - n_observability
+    volumes:
+      - ./config/observability/metrics/prometheus:/etc/prometheus
+      - v_prometheus:/prometheus    # Persist data here
+    command: --web.enable-remote-write-receiver --config.file=/etc/prometheus/prometheus.yaml
+    restart: always
+
+  otel-jaeger:
+    image: jaegertracing/all-in-one:1.72.0
+    container_name: jaeger
+    volumes:
+      - v_jaeger:/badger    # Persist traces here
+    environment:
+      - BADGER_EPHEMERAL=false  # Ensure persistence
+    networks:
+      - n_observability
+    restart: always
+  
+  otel-loki:
+    image: grafana/loki:main-20d93e3
+    container_name: loki
+    volumes:
+      - ./config/observability/logs/loki-config.yaml:/etc/loki/local-config.yaml:ro
+      - v_loki_data:/loki  # Mount a named volume for Loki's data
+    networks:
+      - n_observability
+    restart: always
+
+  otel-cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.52.0
+    container_name: cadvisor
+    privileged: true
+    volumes:
+      - "/:/rootfs:ro"
+      - "/var/run:/var/run:ro"
+      - "/sys:/sys:ro"
+      - "/var/lib/docker/:/var/lib/docker:ro"
+      - "/dev/disk/:/dev/disk:ro"
+    networks:
+      - n_observability
+    restart: always
+
+networks:
+  n_observability:
+    driver: bridge
+
+volumes:
+    v_grafana:
+    v_prometheus:
+    v_loki_data:
+    v_jaeger:
