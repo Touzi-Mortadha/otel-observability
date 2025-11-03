@@ -147,7 +147,7 @@ def api_endpoint_handler(headers, body):
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `OTEL_APP_NAME` | App name for resource attributes | `unknown-service` |
+| `OTEL_SERVICE_NAME` | App name for resource attributes | `unknown-service` |
 | `OTEL_COMPONENT_NAME` | service name for resource attributes | `unknown-component` |
 | `OTEL_GRPC_URL` | OTLP gRPC endpoint URL | None |
 | `OTEL_HTTP_URL` | Base HTTP URL for OTLP HTTP exporters | None |

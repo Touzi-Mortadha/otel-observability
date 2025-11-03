@@ -53,7 +53,7 @@ class ObservabilityConfig:
     def from_env(cls, **kwargs) -> ObservabilityConfig:  # noqa: ANN003
         """Create configuration from environment variables."""
         app_name = kwargs.get("app_name") or os.getenv(
-            "OTEL_APP_NAME", "unknown-service",
+            "OTEL_SERVICE_NAME", "unknown-service",
         )
         component = kwargs.get("component") or os.getenv(
             "OTEL_COMPONENT_NAME", "unknown-component",

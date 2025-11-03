@@ -111,7 +111,7 @@ class TestObservabilityConfigFromEnv:
     def setup_method(self):
         """Clear environment variables before each test."""
         env_vars_to_clear = [
-            "OTEL_APP_NAME", "OTEL_GRPC_URL", "OTEL_HTTP_URL",
+            "OTEL_SERVICE_NAME", "OTEL_GRPC_URL", "OTEL_HTTP_URL",
             "OTEL_HTTP_LOGS_URL", "OTEL_HTTP_TRACES_URL", "OTEL_HTTP_METRICS_URL",
             "LOG_LEVEL", "OTEL_INSECURE", "OTEL_METRIC_EXPORT_INTERVAL_MS",
             "ENABLE_CONSOLE_DEBUG",
@@ -141,7 +141,7 @@ class TestObservabilityConfigFromEnv:
     def test_from_env_environment_variables(self):
         """Test from_env with all environment variables set."""
         os.environ.update({
-            "OTEL_APP_NAME": "env-service",
+            "OTEL_SERVICE_NAME": "env-service",
             "OTEL_GRPC_URL": "grpc://otel:4317",
             "OTEL_HTTP_URL": "http://otel:4318",
             "LOG_LEVEL": "DEBUG",
